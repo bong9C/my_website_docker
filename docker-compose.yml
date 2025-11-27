@@ -1,0 +1,42 @@
+services:
+  # 💻 웹 서비스 (Web Service)
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: mysite-web
+    # http://localhost:8080 으로 접속
+    ports:
+      - "8080:80"
+    env_file: .env
+    # 코드 실시간 반영
+    volumes:
+      - ./app:/var/www/html
+    # DB 컨테이너가 healthy 상태가 될 때까지 대기
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # 🗄️ 데이터베이스 서비스 (Database Service)
+  db:
+    image: mysql:8.0
+    container_name: mysite-db
+    env_file: .env
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci
+    volumes:
+      # 데이터 영속성 유지
+      - db_data:/var/lib/mysql
+      # 초기화 SQL 파일 마운트 (읽기 전용)
+      - ./db/init.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -p$$MYSQL_PASSWORD --silent"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    # 필요 시 외부에서 DB 접속
+#    ports:
+#      - "3306:3306"
+
+# 💾 볼륨 정의 (Volumes Definition)
+volumes:
+  db_data:
