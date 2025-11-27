@@ -7,23 +7,25 @@ GRANT ALL PRIVILEGES ON mysite.* TO 'mysiteuser'@'%';
 FLUSH PRIVILEGES;
 
 -- DB/사용자는 .env로 이미 생성되므로 여기서는 테이블만 준비
+
+-- 1. posts 테이블: professor_name 컬럼 추가
 CREATE TABLE IF NOT EXISTS posts (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(50) NOT NULL,
     title VARCHAR(200) NOT NULL,
     content TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP,
+    professor_name VARCHAR(100) NOT NULL DEFAULT '일반자료' -- ⭐️ 새로운 컬럼 추가
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- ⭐️ 새로운 post_files 테이블 추가: 게시글과 첨부 파일을 연결합니다.
+-- 2. post_files 테이블: 새 테이블
 CREATE TABLE IF NOT EXISTS post_files (
     id INT AUTO_INCREMENT PRIMARY KEY,
     post_id INT NOT NULL,
     original_name VARCHAR(255) NOT NULL,
-    stored_path VARCHAR(255) NOT NULL, -- 서버에 저장된 파일의 고유 경로 (예: uploads/abcdef123.jpg)
+    stored_path VARCHAR(255) NOT NULL,
     mime_type VARCHAR(100) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    -- post_id가 삭제되면 이 파일 메타데이터도 함께 삭제됩니다.
     FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
