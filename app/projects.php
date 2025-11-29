@@ -5,6 +5,11 @@ require_once __DIR__ . '/db.php';
 $pageTitle = "프로젝트";
 require_once 'header.php';
 ?>
+<style>
+    .board {
+    text-align: center;
+    }
+</style>
 <main class="board">
 <h2>진행한 프로젝트 목록</h2>
 <ul>

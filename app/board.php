@@ -1,19 +1,21 @@
 <?php
+// ⭐️ [필수] 암호 인증 확인 및 세션 시작
 session_start();
-require_once __DIR__ . '/db.php';
-
 if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
     header('Location: login.php');
     exit;
 }
-// ⭐️ 파일 첨부 여부를 확인하며, SQL 엄격 모드 오류를 피하기 위해 컬럼을 명확히 나열합니다.
+
+require_once __DIR__ . '/db.php';
+
+// ⭐️ 파일 첨부 여부 및 조회수를 가져옵니다. professor_name 관련 로직은 제거했습니다.
 $stmt = $pdo->prepare("
     SELECT
-        p.id, p.title, p.name, p.created_at,
+        p.id, p.title, p.name, p.created_at, p.views,
         COUNT(pf.id) AS file_count
     FROM posts p
     LEFT JOIN post_files pf ON p.id = pf.post_id
-    GROUP BY p.id, p.title, p.name, p.created_at
+    GROUP BY p.id, p.title, p.name, p.created_at, p.views
     ORDER BY p.id DESC
 ");
 $stmt->execute();
@@ -51,9 +53,10 @@ require_once 'header.php';
     }
     /* ⭐️ 푸터 공간 확보 */
     .board { padding-bottom: 60px; }
+    /* ⭐️ 조회수 컬럼 스타일 */
+    .views-col { width: 50px; text-align: center; }
 </style>
 
-<!-- <h2>, <main> 태그는 header.php에서 이미 처리됩니다. -->
     <div class="actions">
         <a class="btn" href="write.php">글쓰기</a>
     </div>
@@ -64,6 +67,7 @@ require_once 'header.php';
                 <th>제목</th>
                 <th>작성자</th>
                 <th>작성일</th>
+                <th class="views-col">조회</th>
             </tr>
         </thead>
         <tbody>
@@ -77,16 +81,18 @@ require_once 'header.php';
                     <!-- ⭐️ 첨부 파일 아이콘 표시 -->
                     <?php if ((int)$post['file_count'] > 0): ?>
                         <span class="attachment-icon">
-                            [File (<?= (int)$post['file_count'] ?>)]
+                            [File]
                         </span>
                     <?php endif; ?>
                 </td>
                 <td><?= htmlspecialchars($post['name']) ?></td>
                 <td><?= htmlspecialchars($post['created_at']) ?></td>
+                <!-- ⭐️ 조회수 표시 -->
+                <td class="views-col"><?= htmlspecialchars($post['views']) ?></td>
             </tr>
             <?php endforeach; ?>
             <?php if (empty($posts)): ?>
-            <tr><td colspan="4">게시글이 없습니다.</td></tr>
+            <tr><td colspan="5">게시글이 없습니다.</td></tr>
             <?php endif; ?>
         </tbody>
     </table>

@@ -15,8 +15,7 @@ CREATE TABLE IF NOT EXISTS posts (
     title VARCHAR(200) NOT NULL,
     content TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP,
-    professor_name VARCHAR(100) NOT NULL DEFAULT '일반자료' -- ⭐️ 새로운 컬럼 추가
+    updated_at TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 2. post_files 테이블: 새 테이블

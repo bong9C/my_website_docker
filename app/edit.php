@@ -1,24 +1,26 @@
 <?php
+// ⭐️ [필수] 암호 인증 여부를 확인하여, 인증되지 않으면 login.php로 리디렉션
 session_start();
-require_once __DIR__ . '/db.php';
 if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
     header('Location: login.php');
     exit;
 }
 
+require_once __DIR__ . '/db.php';
 
 $id = (int)($_GET['id'] ?? 0);
-// ... (POST 로직은 그대로 유지) ...
+
+// 2. POST 요청인지 확인 (수정 완료 버튼을 눌렀는지)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // 폼 제출 시 수정 처리 로직 시작
 
     $updated_title = $_POST['title'] ?? '';
     $updated_content = $_POST['content'] ?? '';
     $post_id = (int)$_POST['id'] ?? 0;
 
-    $delete_files = $_POST['delete_files'] ?? [];
-    $new_files = $_FILES['files'] ?? null;
+    $delete_files = $_POST['delete_files'] ?? []; // 삭제할 파일 ID 배열
+    $new_files = $_FILES['files'] ?? null; // 새로 업로드된 파일
 
+    // 1. 필수 데이터 검증
     if (empty($updated_title) || empty($updated_content) || $post_id === 0) {
          exit('필수 정보가 누락되었습니다.');
     }
@@ -26,25 +28,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $pdo->beginTransaction();
 
-        // A. 게시글 UPDATE 쿼리 작성 및 실행
+        // A. 게시글 UPDATE 쿼리 실행 (professor_name 필드 제거)
         $sql = "UPDATE posts SET title = ?, content = ?, updated_at = NOW() WHERE id = ?";
         $stmt = $pdo->prepare($sql);
         $success = $stmt->execute([$updated_title, $updated_content, $post_id]);
 
         if (!$success) { throw new Exception("게시글 수정에 실패했습니다."); }
 
-        // B. 파일 삭제 처리
+        // B. 파일 삭제 처리 (기존 파일 체크박스)
         if (!empty($delete_files)) {
+            // 1. DB에서 삭제할 파일의 서버 저장 경로를 조회
             $placeholders = implode(',', array_fill(0, count($delete_files), '?'));
             $sql_select = "SELECT stored_path FROM post_files WHERE id IN ($placeholders) AND post_id = ?";
             $stmt_select = $pdo->prepare($sql_select);
             $stmt_select->execute(array_merge($delete_files, [$post_id]));
             $files_to_delete = $stmt_select->fetchAll(PDO::FETCH_COLUMN);
 
+            // 2. DB 메타데이터 삭제
             $sql_delete = "DELETE FROM post_files WHERE id IN ($placeholders) AND post_id = ?";
             $stmt_delete = $pdo->prepare($sql_delete);
             $stmt_delete->execute(array_merge($delete_files, [$post_id]));
 
+            // 3. 실제 서버 파일 삭제
             foreach ($files_to_delete as $stored_path) {
                 $full_path = str_replace('uploads/', UPLOAD_DIR . '/', $stored_path);
                 if (file_exists($full_path)) { unlink($full_path); }
@@ -57,19 +62,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $files_to_process = count($new_files['name']);
             if ($files_to_process > 3) { throw new Exception("파일은 최대 3개까지만 첨부할 수 있습니다."); }
 
+            // 다중 파일 배열 정리
             $files = [];
             for ($i = 0; $i < $files_to_process; $i++) {
-                $files[] = [
-                    'name' => $new_files['name'][$i], 'type' => $new_files['type'][$i],
-                    'tmp_name' => $new_files['tmp_name'][$i], 'error' => $new_files['error'][$i],
-                    'size' => $new_files['size'][$i],
-                ];
+                if ($_FILES['files']['error'][$i] !== UPLOAD_ERR_NO_FILE) {
+                    $files[] = [
+                        'name' => $new_files['name'][$i], 'type' => $new_files['type'][$i],
+                        'tmp_name' => $new_files['tmp_name'][$i], 'error' => $new_files['error'][$i],
+                        'size' => $new_files['size'][$i],
+                    ];
+                }
             }
 
             foreach ($files as $file) {
                 if ($file['error'] !== UPLOAD_ERR_OK) {
-                    if ($file['error'] !== UPLOAD_ERR_NO_FILE) { throw new Exception("파일 업로드 오류: 코드 " . $file['error']); }
-                    continue;
+                    throw new Exception("파일 업로드 오류: 코드 " . $file['error']);
                 }
 
                 $file_extension = pathinfo($file['name'], PATHINFO_EXTENSION);
@@ -96,6 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+// 3. GET 요청 (수정 페이지를 처음 로드할 때)
 $stmt = $pdo->prepare("SELECT * FROM posts WHERE id = ?");
 $stmt->execute([$id]);
 $post = $stmt->fetch();
@@ -106,7 +114,6 @@ $stmt_files = $pdo->prepare("SELECT * FROM post_files WHERE post_id = ? ORDER BY
 $stmt_files->execute([$id]);
 $files = $stmt_files->fetchAll();
 
-// ⭐️ 페이지 제목 설정
 $pageTitle = "게시글 수정";
 require_once 'header.php';
 ?>
@@ -120,16 +127,12 @@ require_once 'header.php';
         box-sizing: border-box;
         text-align: left; /* 폼 요소 정렬 */
     }
-    /* 폼 요소 스타일은 style.css에 있지만, 혹시 모를 누락을 대비해 기본 스타일을 여기에 유지할게요. */
-    label { display:block; margin:12px 0 6px; }
-    /* input[type="file"] 스타일 추가 */
+    /* 폼 요소 스타일 */
+    .form-group { margin-bottom: 15px; }
+    label { display:block; margin:12px 0 6px; font-weight: bold; }
     input[type="text"], textarea, input[type="file"] { width:100%; padding:10px; border:1px solid #ccc; border-radius:8px; box-sizing: border-box; margin-bottom: 12px;}
     textarea { height: 300px; resize: vertical; }
     /* 버튼 스타일 */
-    .btn { padding: 8px 14px; border: 1px solid #004c99; background:#004c99; color:#fff; text-decoration:none; border-radius:8px; display: inline-block;}
-    .btn-outline { background:#fff; color:#004c99; }
-
-    /* actions div의 스타일 (버튼 정렬) */
     .actions {
         display: flex;
         gap: 8px;
@@ -138,7 +141,7 @@ require_once 'header.php';
     }
 </style>
 
-<!-- 폼 시작 (main 태그는 header.php에서 이미 열려 있습니다) -->
+<!-- 폼 시작 -->
     <!-- ⭐️ 파일 업로드를 위해 enctype 추가 -->
     <form method="POST" action="edit.php?id=<?= $id ?>" enctype="multipart/form-data">
 
@@ -178,7 +181,7 @@ require_once 'header.php';
             <small>새로 첨부할 파일을 선택하세요. (Ctrl/Cmd 키를 누른 채 여러 파일 선택 가능)</small>
         </div>
 
-        <!-- 버튼 액션 영역 (write.php와 통일) -->
+        <!-- 버튼 액션 영역 -->
         <div class="actions" style="margin-top: 15px;">
             <button type="submit" class="btn btn-update">수정 완료</button>
             <a href="view.php?id=<?= $id ?>" class="btn btn-outline">취소</a>
@@ -186,5 +189,4 @@ require_once 'header.php';
     </form>
 <!-- 폼 끝 -->
 <?php
-// ⭐️ 공통 푸터 파일 포함
 require_once 'footer.php';

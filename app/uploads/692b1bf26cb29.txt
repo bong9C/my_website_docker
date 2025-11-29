@@ -1,0 +1,7 @@
+#include <iostream> // 5행의 printf()를 사용하기 위해 <iostream> 기능을 포함시킴
+
+int  main() {       // 3~7행은 메인 함수로 프로그램이 실제로 시작되는 부분
+
+    printf("IT CookBook C언어 자료구조와 알고리즘 for Beginner");
+
+}

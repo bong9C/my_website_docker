@@ -1,15 +1,17 @@
 <?php
+// ⭐️ [필수] 암호 인증 확인 및 세션 시작
 session_start();
-require_once __DIR__ . '/db.php';
 if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
     header('Location: login.php');
     exit;
 }
 
+require_once __DIR__ . '/db.php';
+
 // GET 파라미터로 넘어온 ID를 정수형으로 변환하여 가져옴 (보안 강화)
 $id = (int)($_GET['id'] ?? 0);
 
-// ID를 이용해 데이터베이스에서 게시글 정보 조회
+// 1. ID를 이용해 데이터베이스에서 게시글 정보 조회
 $stmt = $pdo->prepare("SELECT * FROM posts WHERE id = ?");
 $stmt->execute([$id]);
 $post = $stmt->fetch();
@@ -18,6 +20,11 @@ $post = $stmt->fetch();
 if (!$post) {
     exit('글을 찾을 수 없습니다. <a href="board.php">목록</a>');
 }
+
+// ⭐️ [조회수 증가 로직 추가]
+// 2. views 컬럼 값을 1 증가시킵니다.
+$stmt_update = $pdo->prepare("UPDATE posts SET views = views + 1 WHERE id = ?");
+$stmt_update->execute([$id]);
 
 // ⭐️ 현재 게시글에 첨부된 파일 목록 조회
 $stmt_files = $pdo->prepare("SELECT * FROM post_files WHERE post_id = ? ORDER BY id");
@@ -77,6 +84,8 @@ require_once 'header.php';
     <div class="meta">
         작성자: <?= htmlspecialchars($post['name']); ?>
         | 작성일: <?= $post['created_at']; ?>
+        <!-- ⭐️ 조회수 표시 추가 (조회수 증가는 이미 위에서 처리했기 때문에 post['views'] 대신 최신 값인 post['views'] + 1을 사용합니다) -->
+        | 조회수: <?= $post['views'] + 1 ?>
     </div>
 
     <pre><?= htmlspecialchars($post['content']) ?></pre>
