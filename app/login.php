@@ -16,10 +16,10 @@ if (isset($_SESSION['login_error'])) {
     unset($_SESSION['login_error']); // 메시지를 한 번 보여준 후 세션에서 제거
 }
 
-// ⭐️ 페이지 제목 설정
+// 페이지 제목 설정
 $pageTitle = "접속 인증";
 ?>
-<!-- ⭐️ header.php 파일 구조를 수동으로 가져와서, DB 접속 없이 단순 HTML만 표시합니다. -->
+<!-- header.php 파일 구조를 수동으로 가져와서, DB 접속 없이 단순 HTML만 표시합니다. -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -33,9 +33,8 @@ $pageTitle = "접속 인증";
     <h1>강의 자료실 접속 인증</h1>
     <nav>
         <a href="index.php">홈</a>
-        <a href="about.php">자기소개</a>
-        <a href="projects.php">프로젝트</a>
-        <!-- 게시판 대신 로그인으로 대체 -->
+        <a href="about.php">소개</a>
+        <a href="projects.php">오늘의 과제</a>
     </nav>
 </header>
 <main class="board" style="max-width: 400px;">

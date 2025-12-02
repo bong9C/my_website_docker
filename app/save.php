@@ -1,11 +1,11 @@
 <?php
-// ⭐️ [필수] 암호 인증 여부를 확인하여, 인증되지 않으면 login.php로 리디렉션
+// [필수] 암호 인증 여부를 확인하여, 인증되지 않으면 login.php로 리디렉션
 session_start();
 if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
     header('Location: login.php');
     exit;
 }
-// db.php를 포함하여 DB 연결($pdo)과 UPLOAD_DIR 상수를 가져옵니다.
+// db.php를 포함하여 DB 연결($pdo)과 UPLOAD_DIR 상수를 가져옴
 require_once __DIR__ . '/db.php';
 
 // POST 데이터 받기
@@ -38,7 +38,7 @@ try {
         // 다중 파일 업로드 시 배열 재구성
         $files = [];
         for ($i = 0; $i < $files_to_process; $i++) {
-            // UPLOAD_ERR_NO_FILE 오류는 빈 파일 필드를 의미하며, 무시합니다.
+            // UPLOAD_ERR_NO_FILE 오류는 빈 파일 필드를 의미하며, 무시
             if ($_FILES['files']['error'][$i] !== UPLOAD_ERR_NO_FILE) {
                 $files[] = [
                     'name' => $_FILES['files']['name'][$i], 'type' => $_FILES['files']['type'][$i],

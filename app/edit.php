@@ -1,5 +1,5 @@
 <?php
-// ⭐️ [필수] 암호 인증 여부를 확인하여, 인증되지 않으면 login.php로 리디렉션
+// 암호 인증 인증되지 않으면 login.php로 리디렉션
 session_start();
 if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
     header('Location: login.php');
@@ -117,9 +117,8 @@ $files = $stmt_files->fetchAll();
 $pageTitle = "게시글 수정";
 require_once 'header.php';
 ?>
-<!-- ⭐️ header.php에 있던 <style> 블록은 여기에 그대로 유지합니다. -->
+
 <style>
-    /* ⭐️ view.php에서 확인한 규격 통일 */
     .board {
         max-width: 900px;
         margin: 40px auto;
@@ -142,7 +141,6 @@ require_once 'header.php';
 </style>
 
 <!-- 폼 시작 -->
-    <!-- ⭐️ 파일 업로드를 위해 enctype 추가 -->
     <form method="POST" action="edit.php?id=<?= $id ?>" enctype="multipart/form-data">
 
         <input type="hidden" name="id" value="<?= (int)$post['id'] ?>">
@@ -157,7 +155,7 @@ require_once 'header.php';
             <textarea name="content" id="content" rows="10" required><?= htmlspecialchars($post['content']) ?></textarea>
         </div>
 
-        <!-- ⭐️ 기존 첨부 파일 목록 및 삭제 옵션 -->
+        <!--  기존 첨부 파일 목록 및 삭제 옵션 -->
         <?php if (!empty($files)): ?>
         <div class="form-group">
             <strong>기존 첨부 파일:</strong><br>
@@ -174,7 +172,7 @@ require_once 'header.php';
         </div>
         <?php endif; ?>
 
-        <!-- ⭐️ 새 파일 첨부 필드 -->
+        <!-- 새 파일 첨부 필드 -->
         <div class="form-group">
             <label for="files">새 파일 첨부 (최대 3개):</label>
             <input type="file" id="files" name="files[]" multiple accept="image/*, application/pdf, .zip">

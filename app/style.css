@@ -200,3 +200,18 @@ textarea {
 .btn:hover { background: #003366; }
 .btn-outline:hover { background: #f0f0f0; }
 .btn-update:hover { background: #1e7e34; }
+/* 로고 스타일 */
+.logo {
+    /* 화면에 고정시키는 핵심 속성 */
+    position: fixed;
+    /* 고정 위치 설정: 왼쪽 상단 */
+    top: 0;
+    left: 0;
+    background-color: transparent;
+    color: white; /* 글씨 색상 */
+    padding: 10px 15px;
+    font-size: 1.0em;
+    font-weight: bold;
+    /* 다른 요소 위에 항상 보이도록 설정 */
+    z-index: 1000;
+}

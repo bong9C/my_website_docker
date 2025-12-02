@@ -1,7 +1,7 @@
 <?php
-session_start(); // ⭐️ 세션을 맨 위에서 시작
+session_start(); // 세션을 맨 위에서 시작
 
-require_once __DIR__ . '/db.php'; // ⭐️ DB 연결을 여기서 먼저 처리하여 $pdo 생성
+require_once __DIR__ . '/db.php'; //  DB 연결을 여기서 먼저 처리하여 $pdo 생성
 
 $pageTitle = "poly poly 자료공유실";
 require_once 'header.php'; // header.php는 이제 $pdo를 안전하게 사용합니다.

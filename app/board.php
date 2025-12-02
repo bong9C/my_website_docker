@@ -1,5 +1,5 @@
 <?php
-// ⭐️ [필수] 암호 인증 확인 및 세션 시작
+// 암호 인증
 session_start();
 if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
     header('Location: login.php');
@@ -8,7 +8,7 @@ if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
 
 require_once __DIR__ . '/db.php';
 
-// ⭐️ 파일 첨부 여부 및 조회수를 가져옵니다. professor_name 관련 로직은 제거했습니다.
+// 파일 첨부, 조회수
 $stmt = $pdo->prepare("
     SELECT
         p.id, p.title, p.name, p.created_at, p.views,
@@ -21,11 +21,11 @@ $stmt = $pdo->prepare("
 $stmt->execute();
 $posts = $stmt->fetchAll();
 
-// ⭐️ 페이지 제목 설정
-$pageTitle = "게시판";
+// 페이지 제목
+$pageTitle = "자료실";
 require_once 'header.php';
 ?>
-<!-- ⭐️ header.php에 있던 <style> 블록은 여기에 그대로 유지합니다. -->
+
 <style>
     /* 기존 스타일 유지 */
     .board { max-width: 900px; margin: 40px auto; }
@@ -51,9 +51,9 @@ require_once 'header.php';
         vertical-align: middle;
         font-weight: bold;
     }
-    /* ⭐️ 푸터 공간 확보 */
+    /*  푸터 공간 확보 */
     .board { padding-bottom: 60px; }
-    /* ⭐️ 조회수 컬럼 스타일 */
+    /* 조회수 컬럼 스타일 */
     .views-col { width: 50px; text-align: center; }
 </style>
 
@@ -78,7 +78,7 @@ require_once 'header.php';
                     <a href="view.php?id=<?= htmlspecialchars($post['id']) ?>">
                         <?= htmlspecialchars($post['title']) ?>
                     </a>
-                    <!-- ⭐️ 첨부 파일 아이콘 표시 -->
+                    <!-- 첨부 파일 아이콘 표시 -->
                     <?php if ((int)$post['file_count'] > 0): ?>
                         <span class="attachment-icon">
                             [File]
@@ -87,7 +87,7 @@ require_once 'header.php';
                 </td>
                 <td><?= htmlspecialchars($post['name']) ?></td>
                 <td><?= htmlspecialchars($post['created_at']) ?></td>
-                <!-- ⭐️ 조회수 표시 -->
+                <!-- 조회수 표시 -->
                 <td class="views-col"><?= htmlspecialchars($post['views']) ?></td>
             </tr>
             <?php endforeach; ?>
@@ -97,5 +97,5 @@ require_once 'header.php';
         </tbody>
     </table>
 <?php
-// ⭐️ 공통 푸터 파일 포함
+// 공통 푸터 파일 포함
 require_once 'footer.php';
