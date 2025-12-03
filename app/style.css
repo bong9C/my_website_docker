@@ -51,6 +51,7 @@ footer {
     /* write.php, edit.php의 폼 요소를 위해 왼쪽 정렬로 강제 */
     text-align: left;
     padding: 0 20px; /* 좁은 화면을 위해 좌우 패딩 추가 */
+    font-size: 20px;
 }
 
 /* 게시판 목록 테이블 스타일 (board.php) */
